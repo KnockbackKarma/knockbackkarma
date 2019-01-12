@@ -1,1 +1,1 @@
-worker: python knockbackkarma.py
+worker: python bot.py
