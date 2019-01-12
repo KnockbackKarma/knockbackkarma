@@ -1,104 +1,64 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import discord
+from discord.ext import commands
+import asyncio
+from itertools import cycle
 
-# C extensions
-*.so
+client = commands.Bot(command_prefix = '=')
+client.remove_command('help')
+status = ['ALPHA | v0.0.3', 'Coming soon: =help & =info', 'Coming soon: Moderation commands!', 'Coming soon: Fun commands!']
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+async def change_status():
+    await client.wait_until_ready()
+    msgs = cycle(status)
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+    while not client.is_closed:
+        current_status = next(msgs)
+        await client.change_presence(game=discord.Game(name=current_status))
+        await asyncio.sleep(20)
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+@client.event
+async def on_ready():
+    print('I am ready!')
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+@client.event
+async def on_message(message):
+    print('A user has sent a message.')
+    await client.process_commands(message)
 
-# Translations
-*.mo
-*.pot
+@client.command()
+async def ping():
+    await client.say('Pong!')
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
+@client.command()
+async def echo(*args):
+    output = ''
+    for word in args:
+        output += word
+        output += ' '
+    await client.say(output)
 
-# Flask stuff:
-instance/
-.webassets-cache
+@client.command(pass_context=True)
+async def clear(ctx, amount=10):
+    channel = ctx.message.channel
+    messages = []
+    async for message in client.logs_from(channel, limit=int(amount)):
+        messages.append(message)
+    await client.delete_messages(messages)
+    await client.say('Messages have been deleted.')
 
-# Scrapy stuff:
-.scrapy
+@client.command(pass_context=True)
+async def help(ctx):
+    author = ctx.message.author
 
-# Sphinx documentation
-docs/_build/
+    embed = discord.Embed(
+        colour = discord.Colour.red()
+    )
 
-# PyBuilder
-target/
+    embed.set_author(name='Help')
+    embed.add_field(name='=ping', value='Returns a Pong!', inline=False)
 
-# Jupyter Notebook
-.ipynb_checkpoints
+    await client.send_message(author, embed=embed)
 
-# pyenv
-.python-version
+client.loop.create_task(change_status())
+client.run(os.getenv('TOKEN'))
 
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
