@@ -19,4 +19,4 @@ client.on('ready', () => {
 })
 
 
-client.login("NTY0NDAyOTQ4MzQ4ODM3ODg4.XKn-mQ.aiec1_VdYCqBXTrmXfs8WitQHQs")
+client.login("process.emv.TOKEN")
